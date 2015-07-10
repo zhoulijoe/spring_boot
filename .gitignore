@@ -1,0 +1,9 @@
+# gradle
+.gradle/
+
+# IDE
+.idea/libraries/
+.idea/workspace.xml
+
+# build dir
+build/
