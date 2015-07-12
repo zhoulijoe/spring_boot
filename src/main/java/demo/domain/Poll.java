@@ -8,14 +8,14 @@ public class Poll {
 
     @Id
     @GeneratedValue
-    @Column(name="POLL_ID")
+    @Column(name = "POLL_ID")
     private Long id;
 
-    @Column(name="QUESTION")
+    @Column(name = "QUESTION")
     private String question;
 
-    @OneToMany(cascade=CascadeType.ALL)
-    @JoinColumn(name="POLL_ID")
+    @OneToMany(cascade = CascadeType.ALL)
+    @JoinColumn(name = "POLL_ID")
     @OrderBy
     private Set<Option> options;
 
@@ -42,5 +42,4 @@ public class Poll {
     public void setOptions(Set<Option> options) {
         this.options = options;
     }
-
 }
