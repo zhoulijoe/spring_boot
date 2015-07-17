@@ -1,4 +1,4 @@
-package demo.controller;
+package demo.v1.controller;
 
 import demo.domain.Vote;
 import demo.dto.OptionCount;
@@ -15,13 +15,14 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.HashMap;
 import java.util.Map;
 
-@RestController
+@RestController("computeResultControllerV1")
+@RequestMapping("/v1/")
 public class ComputeResultController {
 
     @Autowired
     private VoteRepository voteRepository;
 
-    @RequestMapping(value="/computeResult", method= RequestMethod.GET)
+    @RequestMapping(value="/computeresult", method= RequestMethod.GET)
     public ResponseEntity<VoteResult> computeResult(@RequestParam Long pollId) {
         Iterable<Vote> votes = voteRepository.findByPoll(pollId);
 

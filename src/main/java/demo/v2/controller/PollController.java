@@ -1,9 +1,16 @@
-package demo.controller;
+package demo.v2.controller;
 
+import com.wordnik.swagger.annotations.Api;
+import com.wordnik.swagger.annotations.ApiOperation;
+import com.wordnik.swagger.annotations.ApiResponse;
+import com.wordnik.swagger.annotations.ApiResponses;
 import demo.domain.Poll;
+import demo.dto.error.ErrorDetail;
 import demo.exception.ResourceNotFoundException;
 import demo.repository.PollRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -13,18 +20,23 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import javax.validation.Valid;
 import java.net.URI;
 
-@RestController
+@RestController("pollControllerV2")
+@RequestMapping("/v2/")
+@Api(value="polls", description="Polls API")
 public class PollController {
 
     @Autowired
     private PollRepository pollRepository;
 
     @RequestMapping(value = "polls", method = RequestMethod.GET)
-    public ResponseEntity<Iterable<Poll>> getAllPolls() {
-        return new ResponseEntity<>(pollRepository.findAll(), HttpStatus.OK);
+    @ApiOperation(value = "Retrieves all the polls", response=Poll.class,
+            responseContainer="List")
+    public ResponseEntity<Page<Poll>> getAllPolls(Pageable pageable) {
+        return new ResponseEntity<>(pollRepository.findAll(pageable), HttpStatus.OK);
     }
 
     @RequestMapping(value = "polls/{pollId}", method = RequestMethod.GET)
+    @ApiOperation(value = "Retrieves a Poll associated with the pollId", response=Poll.class)
     public ResponseEntity<Poll> getPoll(@PathVariable Long pollId) {
         Poll poll = verifyPoll(pollId);
 
@@ -32,7 +44,13 @@ public class PollController {
     }
 
     @RequestMapping(value = "polls", method = RequestMethod.POST)
-    public ResponseEntity<?> createPoll(@Valid @RequestBody Poll poll) {
+    @ApiOperation(value = "Creates a new Poll",
+            notes="The newly created poll Id will be sent in the location response header",
+            response = Void.class)
+    @ApiResponses(value = {@ApiResponse(code=201, message="Poll Created Successfully",
+            response=Void.class),
+            @ApiResponse(code=500, message="Error creating Poll", response=ErrorDetail.class) } )
+    public ResponseEntity<Void> createPoll(@Valid @RequestBody Poll poll) {
         Poll newPoll = pollRepository.save(poll);
 
         URI pollUri = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}").buildAndExpand(newPoll.getId())

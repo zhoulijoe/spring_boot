@@ -1,4 +1,4 @@
-package demo.controller;
+package demo.v1.controller;
 
 import demo.domain.Vote;
 import demo.repository.VoteRepository;
@@ -11,7 +11,8 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.net.URI;
 
-@RestController
+@RestController("voteControllerV1")
+@RequestMapping("/v1/")
 public class VoteController {
 
     @Autowired
