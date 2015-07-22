@@ -8,6 +8,7 @@ import com.zhou.quickpoll.domain.Poll;
 import com.zhou.quickpoll.dto.error.ErrorDetail;
 import com.zhou.quickpoll.exception.ResourceNotFoundException;
 import com.zhou.quickpoll.repository.PollRepository;
+import com.zhou.quickpoll.v1.controller.ComputeResultController;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -21,8 +22,11 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import javax.validation.Valid;
 import java.net.URI;
 
+import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
+import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
+
 @RestController("pollControllerV3")
-@RequestMapping({"/v3/", "/oauth2/v3/"})
+@RequestMapping("/oauth2/v3/")
 @Api(value="polls", description="Polls API")
 public class PollController {
 
@@ -33,13 +37,21 @@ public class PollController {
     @ApiOperation(value = "Retrieves all the polls", response=Poll.class,
             responseContainer="List")
     public ResponseEntity<Page<Poll>> getAllPolls(Pageable pageable) {
-        return new ResponseEntity<>(pollRepository.findAll(pageable), HttpStatus.OK);
+        Page<Poll> polls = pollRepository.findAll(pageable);
+
+        for (Poll poll : polls) {
+            updatePollResourceWithLinks(poll, pageable);
+        }
+
+        return new ResponseEntity<>(polls, HttpStatus.OK);
     }
 
     @RequestMapping(value = "polls/{pollId}", method = RequestMethod.GET)
     @ApiOperation(value = "Retrieves a Poll associated with the pollId", response=Poll.class)
     public ResponseEntity<Poll> getPoll(@PathVariable Long pollId) {
         Poll poll = verifyPoll(pollId);
+
+        updatePollResourceWithLinks(poll, null);
 
         return new ResponseEntity<>(poll, HttpStatus.OK);
     }
@@ -54,7 +66,7 @@ public class PollController {
     public ResponseEntity<Void> createPoll(@Valid @RequestBody Poll poll) {
         Poll newPoll = pollRepository.save(poll);
 
-        URI pollUri = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}").buildAndExpand(newPoll.getId())
+        URI pollUri = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}").buildAndExpand(newPoll.getPollId())
                 .toUri();
         HttpHeaders responseHeaders = new HttpHeaders();
         responseHeaders.setLocation(pollUri);
@@ -87,5 +99,14 @@ public class PollController {
         }
 
         return poll;
+    }
+
+    private void updatePollResourceWithLinks(Poll poll, Pageable pageable) {
+        poll.add(linkTo(methodOn(PollController.class).getAllPolls(pageable)).slash(poll.
+                getPollId()).withSelfRel());
+        poll.add(linkTo(methodOn(VoteController.class).getAllVotes(poll.getPollId())).
+                withRel("votes"));
+        poll.add(linkTo(methodOn(ComputeResultController.class).computeResult(poll.
+                getPollId())).withRel("compute-result"));
     }
 }

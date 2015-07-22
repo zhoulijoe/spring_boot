@@ -4,10 +4,10 @@ import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
 import com.wordnik.swagger.annotations.ApiResponse;
 import com.wordnik.swagger.annotations.ApiResponses;
-import com.zhou.quickpoll.exception.ResourceNotFoundException;
-import com.zhou.quickpoll.repository.PollRepository;
 import com.zhou.quickpoll.domain.Poll;
 import com.zhou.quickpoll.dto.error.ErrorDetail;
+import com.zhou.quickpoll.exception.ResourceNotFoundException;
+import com.zhou.quickpoll.repository.PollRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -51,7 +51,7 @@ public class PollController {
     public ResponseEntity<Void> createPoll(@Valid @RequestBody Poll poll) {
         Poll newPoll = pollRepository.save(poll);
 
-        URI pollUri = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}").buildAndExpand(newPoll.getId())
+        URI pollUri = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}").buildAndExpand(newPoll.getPollId())
                 .toUri();
         HttpHeaders responseHeaders = new HttpHeaders();
         responseHeaders.setLocation(pollUri);

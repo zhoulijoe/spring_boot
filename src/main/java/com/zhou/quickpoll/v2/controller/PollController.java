@@ -53,7 +53,7 @@ public class PollController {
     public ResponseEntity<Void> createPoll(@Valid @RequestBody Poll poll) {
         Poll newPoll = pollRepository.save(poll);
 
-        URI pollUri = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}").buildAndExpand(newPoll.getId())
+        URI pollUri = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}").buildAndExpand(newPoll.getPollId())
                 .toUri();
         HttpHeaders responseHeaders = new HttpHeaders();
         responseHeaders.setLocation(pollUri);
